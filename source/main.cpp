@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 		u32 released = WPAD_ButtonsUp(0);
 		u32 held = WPAD_ButtonsHeld(0);
 		if (pressed & WPAD_BUTTON_HOME) break;
-		if (pressed & WPAD_BUTTON_DOWN) {
+		if (held & WPAD_BUTTON_LEFT) {
 			eng.downPressed();
 		}
 		if (pressed & WPAD_BUTTON_UP) {
@@ -36,6 +36,9 @@ int main(int argc, char **argv) {
 		}
 		if (pressed & WPAD_BUTTON_DOWN) {
 			eng.rightHeld();
+		}
+		if (pressed & WPAD_BUTTON_B) {
+			eng.hold();
 		}
 		if (pressed & WPAD_BUTTON_2) {
 			eng.rotate();

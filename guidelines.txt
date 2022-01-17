@@ -19,14 +19,3 @@ Tetris = 8 lines
 Designated soft drop speed. Details vary between guideline versions.
 
 Must have sound effects on by default, on rotation, movement, landing on surface, touching a wall, locking, line clear and game over.
-
-So-called 7-bag Random Generator (also called "random bag" or "7 system")
-
-Tetrimino colors are as follows.
-Cyan I
-Yellow O
-Purple T
-Green S
-Red Z
-Blue J
-Orange L

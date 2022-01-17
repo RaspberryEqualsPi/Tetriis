@@ -3,7 +3,7 @@
 #include <vector>
 #include <grrlib.h>
 #include "Engine.h"
-typedef void(*drawCB)(int x, int y, int w, int h, uint32_t col1, uint32_t col2);
+typedef void(*drawCB)(float x, float y, float w, float h, uint32_t col1, uint32_t col2);
 drawCB defaultCB;
 enum class Tetronimos {
 	STet = 1,
@@ -244,12 +244,13 @@ namespace Tetronimo {
 	};
 	class Tetronimo {
 	public:
-		int x = 0;
-		int y = 0;
+		float x = 0;
+		float y = 0;
 		int w = 16;
 		int h = 16;
 		int rot = 0;
 		bool isStatue = false;
+		bool isHoldPiece = false;
 		Tetronimos type = Tetronimos::STet;
 		uint32_t col1 = RGBA(255, 0, 0, 255);
 		uint32_t col2 = RGBA(255, 255, 255, 255);
@@ -257,7 +258,7 @@ namespace Tetronimo {
 		void draw() {
 			for (int i = 0; i < 4; i++) {
 				if (!(blocks[i].inActive)) {
-					drw(blocks[i].offsetX + x, blocks[i].offsetY + y, w, h, col1, col2);
+					drw((float)(blocks[i].offsetX) + x, (float)(blocks[i].offsetY) + y, w, h, col1, col2);
 				}
 			}
 		}

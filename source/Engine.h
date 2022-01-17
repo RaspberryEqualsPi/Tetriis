@@ -25,7 +25,7 @@ std::vector<Tetronimos> allTets = { Tetronimos::STet, Tetronimos::JTet, Tetronim
 bool rgbCmp(unsigned char* rgb, unsigned char r, unsigned char g, unsigned char b) {
 	return rgb[0] == r && rgb[1] == g && rgb[2] == b;
 }
-void GRRLIB_CB(int x, int y, int w, int h, uint32_t col1, uint32_t col2) {
+void GRRLIB_CB(float x, float y, float w, float h, uint32_t col1, uint32_t col2) {
 	//GRRLIB_Rectangle(x * w, y * h, w, h, col1, true);
 	//GRRLIB_Rectangle(x * w + ((w / 16) * 2), y * h + ((h / 16) * 2), w - ((w / 16) * 4), h - ((w / 16) * 4), col2, true);
 	unsigned char rgb[3];
@@ -109,10 +109,11 @@ void TetEngine_Init() {
 }
 class TetEngine {
 public:
-	std::vector<Tetronimos> next;
+	std::vector<Tetronimo::Tetronimo> next;
 	std::vector<Tetronimos> usedTets;
 	std::vector<Tetronimo::Tetronimo> statueTets;
 	Tetronimo::Tetronimo curTet;
+	Tetronimo::Tetronimo holdTet = Tetronimo::Tetronimo(GRRLIB_CB);
 	Tetronimo::Ghost ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
 	int curFrame = 0;
 	int timerFrame = 0;
@@ -120,16 +121,21 @@ public:
 	int timerResets = 0;
 	bool visible = true;
 	bool hardDrop = false;
+	bool alreadyHeld = false;
 	int w = 16;
 	int h = 16;
 	int x = 96;
 	int y = 96;
 	void newTet() {
+		alreadyHeld = false;
 		curTet = Tetronimo::Tetronimo(GRRLIB_CB);
-		curTet.type = next[0];
+		curTet.type = next[0].type;
 		curTet.refresh();
 		next.erase(next.begin());
-		next.push_back(randomize());
+		Tetronimo::Tetronimo tet(GRRLIB_CB);
+		tet.type = randomize();
+		tet.refresh();
+		next.push_back(tet);
 		curTet.x = x / w + 3;
 		curTet.y = y / h;
 		timerFrame = 0;
@@ -143,7 +149,10 @@ public:
 	}
 	void newInstance() {
 		for (int i = 0; i < 5; i++) {
-			next.push_back(randomize());
+			Tetronimo::Tetronimo tet(GRRLIB_CB);
+			tet.type = randomize();
+			tet.refresh();
+			next.push_back(tet);
 		}
 	}
 	Tetronimos randomize() {
@@ -169,7 +178,7 @@ public:
 		}
 	}
 	void downPressed() {
-		dropGrav = gravity * 2.f;
+		dropGrav = gravity * 20.f;
 	}
 	void downReleased() {
 		dropGrav = gravity;
@@ -178,6 +187,26 @@ public:
 		if (!checkLeftCol())
 			curTet.x--;
 		resetGhost();
+	}
+	void hold() {
+		if (!alreadyHeld) {
+			if (!(holdTet.isHoldPiece)) {
+				holdTet.type = curTet.type;
+				newTet();
+			}
+			else {
+				Tetronimos curType = curTet.type;
+				curTet.type = holdTet.type;
+				holdTet.type = curType;
+				curTet.refresh();
+				curTet.y = y / 16;
+			}
+			holdTet.refresh();
+			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
+			resetGhost();
+			holdTet.isHoldPiece = true;
+		}
+		alreadyHeld = true;
 	}
 	void rotate() {
 		int oldRot = curTet.rot;
@@ -452,14 +481,80 @@ public:
 	bool checkSideCol() {
 		return checkLeftCol() || checkRightCol();
 	}
-	void render() {
-		if (checkLowCol()) {
-			timerActive = true;
+	void drawHoldFrame() {
+		GRRLIB_Rectangle(x - (w * 3) - (w / 2), y, w * 2 + (w / 2), h * 2, RGBA(255, 255, 255, 255), false);
+		holdTet.refresh();
+		if (holdTet.isHoldPiece) {
+			switch (holdTet.type) {
+			case Tetronimos::ITet:
+				holdTet.w = w / 2;
+				holdTet.h = h / 2;
+				holdTet.x = (float)x / ((float)w / 2.f) - 6.5;
+				holdTet.y = (float)y / ((float)w / 2) + 0.5;
+				holdTet.draw();
+				break;
+			case Tetronimos::OTet:
+				holdTet.w = w / 2;
+				holdTet.h = h / 2;
+				holdTet.x = (float)x / ((float)w / 2.f) - 6.5;
+				holdTet.y = y / (w / 2) + 1;
+				holdTet.draw();
+				break;
+			default:
+				//if (holdTet.isHoldPiece) {
+				holdTet.w = w / 2;
+				holdTet.h = h / 2;
+				holdTet.x = (float)x / ((float)w / 2.f) - 7;
+				holdTet.y = y / (w / 2) + 1;
+				holdTet.draw();
+				break;
+				//}
+			}
 		}
+	}
+	void drawNextFrame(int index, float yOffset) {
+		GRRLIB_Rectangle(x + w * 10 + w, y + (yOffset * h) + ((h * 3) * index), w * 2 + (w / 2), h * 2, RGBA(255, 255, 255, 255), false);
+		switch (next[index].type) {
+		case Tetronimos::ITet:
+			next[index].w = w / 2;
+			next[index].h = h / 2;
+			next[index].x = (float)x / ((float)w / 2.f) + 22.5f;
+			next[index].y = (float)y / ((float)w / 2) + 0.5f + yOffset * 2 + (6.f * index);
+			next[index].draw();
+			break;
+		case Tetronimos::OTet:
+			next[index].w = w / 2;
+			next[index].h = h / 2;
+			next[index].x = (float)x / ((float)w / 2.f) + 22.5f;
+			next[index].y = (float)y / ((float)w / 2) + 1.f + yOffset * 2 + (6.f * index);
+			next[index].draw();
+			break;
+		default:
+			next[index].w = w / 2;
+			next[index].h = h / 2;
+			next[index].x = x / (w / 2) + 22;
+			next[index].y = y / (w / 2.f) + 1.f + yOffset * 2 + (6.f * index);
+			next[index].draw();
+		}
+	}
+	void render() {
+		resetGhost();
 		if (timerFrame == 30) {
 			curTet.isStatue = true;
 			statueTets.push_back(curTet);
 			newTet();
+		}
+		curTet.w = w;
+		curTet.h = h;
+		ghost.w = w;
+		ghost.h = h;
+		GRRLIB_PrintfTTF(x + w * 10 + w + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, arcade, "Next", h / 2, RGBA(255, 255, 255, 255));
+		for (int i = 0; i < 5; i++) {
+			drawNextFrame(i, 1.5);
+		}
+		drawHoldFrame();
+		if (checkLowCol()) {
+			timerActive = true;
 		}
 		//while (checkSideColG1()) {
 			//ghost.y--;
@@ -553,8 +648,6 @@ public:
 		else {
 			curTet.draw();
 		}
-		curTet.w = w;
-		curTet.h = h;
 		switch (level) { // lmao imagine seeing this, good thing no ones reading this, or are they?
 		case 1:
 			gravity = 0.01667;
@@ -609,7 +702,7 @@ public:
 		float cur = 1.f / dropGrav;
 		curFrame++;
 		if (curFrame >= cur) {
-			if (timerFrame != 30 && !hardDrop) {
+			if (timerFrame != 30 && !hardDrop && !checkLowCol()) {
 				curTet.y++;
 			}
 			curFrame = 0;
@@ -617,12 +710,14 @@ public:
 		GRRLIB_Rectangle(x, y, 10 * w, 20 * h, RGBA(255, 255, 255, 255), false); // decided not to waste a bunch of time making this cross platform
 	}
 	TetEngine(int w1, int h1) {
+		//holdTet.isHoldPiece = true;
 		w = w1;
 		h = h1;
 		newInstance();
 		newTet();
 	}
 	TetEngine() {
+		//holdTet.isHoldPiece = true;
 		newInstance();
 		newTet();
 	}
