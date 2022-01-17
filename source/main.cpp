@@ -1,8 +1,5 @@
-/****************************************************************************
- * OGG Playback example
- * Tantric 2009
- ***************************************************************************/
-
+// this was originally meant to be easy to port but mid-way i decided "fuck it, it's easier to just make it go wii all the way"
+// also, this is intended to be played with a sideways remote
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
@@ -11,7 +8,6 @@
 #include <grrlib.h>
 #include <string>
 #include <fat.h>
-#include "arcadettf.h"
 #include "oggplayer.h"
 #include "tetris_ogg.h"
 #include "Engine.h"
@@ -23,8 +19,7 @@ int main(int argc, char **argv) {
 	WPAD_Init();
 	fatInitDefault();
 	//LWP_MutexInit(&engmut, false);
-	GRRLIB_ttfFont* arcade = GRRLIB_LoadTTF(ArcadeTTF, ArcadeTTF_length);
-	defaultCB = GRRLIB_CB;
+	TetEngine_Init();
 	TetEngine eng;
 	PlayOgg(tetris_ogg, tetris_ogg_size, 0, OGG_INFINITE_TIME);
 	while(1) {
@@ -36,19 +31,22 @@ int main(int argc, char **argv) {
 		if (pressed & WPAD_BUTTON_DOWN) {
 			eng.downPressed();
 		}
-		if (pressed & WPAD_BUTTON_LEFT) {
+		if (pressed & WPAD_BUTTON_UP) {
 			eng.leftHeld();
 		}
-		if (pressed & WPAD_BUTTON_RIGHT) {
+		if (pressed & WPAD_BUTTON_DOWN) {
 			eng.rightHeld();
+		}
+		if (pressed & WPAD_BUTTON_2) {
+			eng.rotate();
 		}
 		if (pressed & WPAD_BUTTON_1) {
 			eng.hardDropPressed();
 		}
-		if (released & WPAD_BUTTON_DOWN) {
+		if (released & WPAD_BUTTON_LEFT) {
 			eng.downReleased();
 		}
-		if (held & WPAD_BUTTON_LEFT) {
+		if (held & WPAD_BUTTON_UP) {
 			lHeldFrame++;
 			if (lHeldFrame == 10) {
 				eng.leftHeld();
@@ -58,7 +56,7 @@ int main(int argc, char **argv) {
 		else {
 			lHeldFrame = 0;
 		}
-		if (held & WPAD_BUTTON_RIGHT) {
+		if (held & WPAD_BUTTON_DOWN) {
 			rHeldFrame++;
 			if (rHeldFrame == 10) {
 				eng.rightHeld();
@@ -68,7 +66,7 @@ int main(int argc, char **argv) {
 		else {
 			rHeldFrame = 0;
 		}
-		GRRLIB_PrintfTTF(0, 0, arcade, std::to_string(gravity).c_str(), 11, RGBA(255, 255, 255, 255));
+		GRRLIB_PrintfTTF(0, 0, arcade, debugval.c_str(), 11, RGBA(255, 255, 255, 255));
 		eng.render();
 		GRRLIB_Render();
 	}

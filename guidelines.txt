@@ -1,0 +1,32 @@
+important things:
+Rewarding of Back to Back chains. (Tetris / T-spin)Recognition method depends on the game.
+Mini T-spin is when one of the minoes next to pointing side is empty, or holes were made without using the triple kick.
+Recognition and rewarding of T-spin moves. Conditions vary between guideline versions.
+2005 / 2009: 3-corner T
+
+The player tops out when a piece is spawned overlapping at least one block (block out), or a piece locks completely above the visible portion of the playfield (lock out).
+
+Player may only level up by clearing lines or performing T-Spins. Required lines depends on the game.
+May use fixed-goal or variable-goal.
+Fixed goal is 10 lines
+Variable goal is 5 times the level number.
+The line values for variable-goal levels are as follows:
+Single = 1 line
+Double = 3 lines
+Triple = 5 lines
+Tetris = 8 lines
+
+Designated soft drop speed. Details vary between guideline versions.
+
+Must have sound effects on by default, on rotation, movement, landing on surface, touching a wall, locking, line clear and game over.
+
+So-called 7-bag Random Generator (also called "random bag" or "7 system")
+
+Tetrimino colors are as follows.
+Cyan I
+Yellow O
+Purple T
+Green S
+Red Z
+Blue J
+Orange L

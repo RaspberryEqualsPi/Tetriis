@@ -147,6 +147,7 @@
     <ClCompile Include="..\source\oggplayer.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\source\arcadettf.h" />
     <ClInclude Include="..\source\Engine.h" />
     <ClInclude Include="..\source\Tetronimo.h" />
   </ItemGroup>
