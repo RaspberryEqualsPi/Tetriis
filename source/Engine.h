@@ -481,8 +481,8 @@ public:
 	bool checkSideCol() {
 		return checkLeftCol() || checkRightCol();
 	}
-	void drawHoldFrame() {
-		GRRLIB_Rectangle(x - (w * 3) - (w / 2), y, w * 2 + (w / 2), h * 2, RGBA(255, 255, 255, 255), false);
+	void drawHoldFrame(float yOffset) {
+		GRRLIB_Rectangle(x - (w * 3) - (w / 2), y + (yOffset * h), w * 2 + (w / 2), h * 2, RGBA(255, 255, 255, 255), false);
 		holdTet.refresh();
 		if (holdTet.isHoldPiece) {
 			switch (holdTet.type) {
@@ -490,14 +490,14 @@ public:
 				holdTet.w = w / 2;
 				holdTet.h = h / 2;
 				holdTet.x = (float)x / ((float)w / 2.f) - 6.5;
-				holdTet.y = (float)y / ((float)w / 2) + 0.5;
+				holdTet.y = (float)y / ((float)w / 2) + 0.5 + (yOffset * 2);
 				holdTet.draw();
 				break;
 			case Tetronimos::OTet:
 				holdTet.w = w / 2;
 				holdTet.h = h / 2;
 				holdTet.x = (float)x / ((float)w / 2.f) - 6.5;
-				holdTet.y = y / (w / 2) + 1;
+				holdTet.y = y / (w / 2) + 1 + (yOffset * 2);
 				holdTet.draw();
 				break;
 			default:
@@ -505,7 +505,7 @@ public:
 				holdTet.w = w / 2;
 				holdTet.h = h / 2;
 				holdTet.x = (float)x / ((float)w / 2.f) - 7;
-				holdTet.y = y / (w / 2) + 1;
+				holdTet.y = y / (w / 2) + 1 + (yOffset * 2);
 				holdTet.draw();
 				break;
 				//}
@@ -548,11 +548,12 @@ public:
 		curTet.h = h;
 		ghost.w = w;
 		ghost.h = h;
+		GRRLIB_PrintfTTF(x - (w * 3) - (w / 2) + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, arcade, "Hold", h / 2, RGBA(255, 255, 255, 255));
 		GRRLIB_PrintfTTF(x + w * 10 + w + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, arcade, "Next", h / 2, RGBA(255, 255, 255, 255));
 		for (int i = 0; i < 5; i++) {
-			drawNextFrame(i, 1.5);
+			drawNextFrame(i, 1.5f);
 		}
-		drawHoldFrame();
+		drawHoldFrame(1.5f);
 		if (checkLowCol()) {
 			timerActive = true;
 		}
