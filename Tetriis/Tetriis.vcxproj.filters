@@ -32,5 +32,8 @@
     <ClInclude Include="..\source\arcadettf.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\source\kicks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

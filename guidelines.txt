@@ -16,6 +16,4 @@ Double = 3 lines
 Triple = 5 lines
 Tetris = 8 lines
 
-Designated soft drop speed. Details vary between guideline versions.
-
 Must have sound effects on by default, on rotation, movement, landing on surface, touching a wall, locking, line clear and game over.

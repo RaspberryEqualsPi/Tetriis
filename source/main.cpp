@@ -44,6 +44,9 @@ int main(int argc, char **argv) {
 			eng.rotate();
 		}
 		if (pressed & WPAD_BUTTON_1) {
+			eng.rotateC();
+		}
+		if (pressed & WPAD_BUTTON_RIGHT) {
 			eng.hardDropPressed();
 		}
 		if (released & WPAD_BUTTON_LEFT) {

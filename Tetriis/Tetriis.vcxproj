@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="..\source\arcadettf.h" />
     <ClInclude Include="..\source\Engine.h" />
+    <ClInclude Include="..\source\kicks.h" />
     <ClInclude Include="..\source\Tetronimo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

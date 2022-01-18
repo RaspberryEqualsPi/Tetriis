@@ -1,10 +1,10 @@
 #pragma once
 #include <time.h>
 #include <string>
-#include "pthread.h"
 #include "Tetronimo.h"
 #include "arcadettf.h"
 #include "tetris.h"
+#include "kicks.h"
 #define GRRLIB_CALLBACK GRRLIB_CB
 float gravity = 0.01667;
 float dropGrav = gravity;
@@ -173,6 +173,7 @@ public:
 	}
 	void resetGhost() {
 		ghost.x = curTet.x;
+		ghost.y = curTet.y;
 		while (!checkLowColG()) {
 			ghost.y++;
 		}
@@ -200,6 +201,9 @@ public:
 				holdTet.type = curType;
 				curTet.refresh();
 				curTet.y = y / 16;
+				curTet.x = x / w + 3;
+				curTet.y = y / h;
+				visible = true;
 			}
 			holdTet.refresh();
 			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
@@ -207,6 +211,41 @@ public:
 			holdTet.isHoldPiece = true;
 		}
 		alreadyHeld = true;
+	}
+	void rotateC() {
+		int oldRot = curTet.rot;
+		if (curTet.rot != 0) {
+			curTet.rot--;
+		}
+		else {
+			curTet.rot = 3;
+		}
+		std::vector<std::pair<int, int>> kicks = getOffsets(curTet.type, oldRot, curTet.rot);
+		curTet.refresh();
+		bool success = false;
+		for (int i = 0; i < kicks.size(); i++) {
+			int oldY = curTet.y;
+			int oldX = curTet.x;
+			curTet.y += kicks[i].second;
+			curTet.x += kicks[i].first;
+			if (!(checkLeftColR() || checkRightColR() || checkLowColR())) {
+				success = true;
+				break;
+			}
+			else {
+				curTet.y = oldY;
+				curTet.x = oldX;
+			}
+		}
+		if (!success) {
+			curTet.rot = oldRot;
+			curTet.refresh();
+		}
+		else {
+			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
+			curTet.refresh();
+		}
+		resetGhost();
 	}
 	void rotate() {
 		int oldRot = curTet.rot;
@@ -216,13 +255,30 @@ public:
 		else {
 			curTet.rot = 0;
 		}
+		std::vector<std::pair<int, int>> kicks = getOffsets(curTet.type, oldRot, curTet.rot);
 		curTet.refresh();
-		if (checkLeftColR() || checkRightColR() || checkLowColR()) {
+		bool success = false;
+		for (int i = 0; i < kicks.size(); i++) {
+			int oldY = curTet.y;
+			int oldX = curTet.x;
+			curTet.y += kicks[i].second;
+			curTet.x += kicks[i].first;
+			if (!(checkLeftColR() || checkRightColR() || checkLowColR())) {
+				success = true;
+				break;
+			}
+			else {
+				curTet.y = oldY;
+				curTet.x = oldX;
+			}
+		}
+		if (!success) {
 			curTet.rot = oldRot;
 			curTet.refresh();
 		}
 		else {
 			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
+			curTet.refresh();
 		}
 		resetGhost();
 	}
