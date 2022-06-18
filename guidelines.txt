@@ -5,7 +5,7 @@ Recognition and rewarding of T-spin moves. Conditions vary between guideline ver
 The player tops out when a piece is spawned overlapping at least one block (block out), or a piece locks completely above the visible portion of the playfield (lock out).
 
 Player may only level up by clearing lines or performing T-Spins. Required lines depends on the game.
-May use fixed-goal or variable-goal.
+May use fixed-goal or variable-goal. (variable-goal is better)
 Fixed goal is 10 lines
 Variable goal is 5 times the level number.
 The line values for variable-goal levels are as follows:
