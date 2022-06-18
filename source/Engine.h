@@ -5,6 +5,7 @@
 #include "arcadettf.h"
 #include "tetris.h"
 #include "kicks.h"
+#include "unispace.h"
 #define GRRLIB_CALLBACK GRRLIB_CB
 float gravity = 0.01667;
 float dropGrav = gravity;
@@ -20,6 +21,7 @@ GRRLIB_texImg* Cyan;
 GRRLIB_texImg* Blue;
 GRRLIB_texImg* Purple;
 GRRLIB_texImg* Gray;
+GRRLIB_texImg* unispace;
 GRRLIB_ttfFont* arcade;
 std::vector<Tetronimos> allTets = { Tetronimos::STet, Tetronimos::JTet, Tetronimos::LTet, Tetronimos::ITet, Tetronimos::OTet, Tetronimos::ZTet, Tetronimos::TTet };
 bool rgbCmp(unsigned char* rgb, unsigned char r, unsigned char g, unsigned char b) {
@@ -55,6 +57,8 @@ void GRRLIB_CB(float x, float y, float w, float h, uint32_t col1, uint32_t col2)
 void TetEngine_Init() {
 	srand(time(NULL));
 	arcade = GRRLIB_LoadTTF(ArcadeTTF, ArcadeTTF_length);
+	unispace = GRRLIB_LoadTexture(Unispace_18);
+	GRRLIB_InitTileSet(unispace, 15, 29, 32);
 	Red = GRRLIB_CreateEmptyTexture(32, 32);
 	Green = GRRLIB_CreateEmptyTexture(32, 32);
 	Cyan = GRRLIB_CreateEmptyTexture(32, 32);
@@ -115,6 +119,7 @@ public:
 	Tetronimo::Tetronimo curTet;
 	Tetronimo::Tetronimo holdTet = Tetronimo::Tetronimo(GRRLIB_CB);
 	Tetronimo::Ghost ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
+	std::string animText = "Unknown T-Spin (Error 003)";
 	int curFrame = 0;
 	int timerFrame = 0;
 	bool timerActive = false;
@@ -122,26 +127,30 @@ public:
 	bool visible = true;
 	bool hardDrop = false;
 	bool alreadyHeld = false;
+	bool tSM = false;
+	bool tS = false;
+	int animFrame = 60;
 	int w = 16;
 	int h = 16;
 	int x = 96;
 	int y = 96;
+	int colCount = 0;
 	void newTet() {
 		alreadyHeld = false;
 		curTet = Tetronimo::Tetronimo(GRRLIB_CB);
 		curTet.type = next[0].type;
+		curTet.x = x / w + 3;
+		curTet.y = y / h;
 		curTet.refresh();
 		next.erase(next.begin());
 		Tetronimo::Tetronimo tet(GRRLIB_CB);
 		tet.type = randomize();
 		tet.refresh();
 		next.push_back(tet);
-		curTet.x = x / w + 3;
-		curTet.y = y / h;
-		timerFrame = 0;
 		timerActive = false;
 		visible = true;
 		timerResets = 0;
+		timerFrame = 0;
 		hardDrop = false;
 		dropGrav = gravity;
 		ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
@@ -185,8 +194,14 @@ public:
 		dropGrav = gravity;
 	}
 	void leftHeld() {
-		if (!checkLeftCol())
+		if (!checkLeftCol()) {
+			if (timerFrame != 0) {
+				timerFrame = 0;
+				timerResets++;
+				visible = true;
+			}
 			curTet.x--;
+		}
 		resetGhost();
 	}
 	void hold() {
@@ -242,8 +257,40 @@ public:
 			curTet.refresh();
 		}
 		else {
+			if (timerFrame != 0) {
+				visible = true;
+				timerFrame = 0;
+				timerResets++;
+			}
+			colCount = 0;
 			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
 			curTet.refresh();
+			if (curTet.type == Tetronimos::TTet) {
+				bool tspin = false;
+				bool tspinmini = false;
+				int x1 = curTet.x + 2;
+				int y1 = curTet.y + 1;
+				int succeededtests = 0;
+				succeededtests += checkColS(x1 + 1, y1 + 1); // next up, check for mini t-spins (this should be simple, just check if it collides with a y offset of 1 under the center, and if it does its a mini :D
+				succeededtests += checkColS(x1 - 1, y1 + 1);
+				succeededtests += checkColS(x1 - 1, y1 - 1);
+				succeededtests += checkColS(x1 + 1, y1 - 1);
+				if (succeededtests >= 3) {
+					for (int i = 0; i < 4; i++) {
+						int y2 = curTet.blocks[i].offsetY + curTet.y;
+						int x2 = curTet.blocks[i].offsetX + curTet.x;
+						if (y1 + 1 == y2 && x2 == x1) {
+							tspin = true;
+						}
+					}
+					if (!tspin) {
+						tspinmini = true;
+					}
+				}
+				tS = tspin;
+				tSM = tspinmini;
+				colCount = succeededtests;
+			}
 		}
 		resetGhost();
 	}
@@ -277,14 +324,52 @@ public:
 			curTet.refresh();
 		}
 		else {
+			if (timerFrame != 0) {
+				visible = true;
+				timerFrame = 0;
+				timerResets++;
+			}
+			colCount = 0;
 			ghost = Tetronimo::Ghost(curTet.blocks, curTet.col1, GRRLIB_CB);
 			curTet.refresh();
+			if (curTet.type == Tetronimos::TTet) {
+				bool tspin = false;
+				bool tspinmini = false;
+				int x1 = curTet.x + 2;
+				int y1 = curTet.y + 1;
+				int succeededtests = 0;
+				succeededtests += checkColS(x1 + 1, y1 + 1); // next up, check for mini t-spins (this should be simple, just check if it collides with a y offset of 1 under the center, and if it does its a mini :D
+				succeededtests += checkColS(x1 - 1, y1 + 1);
+				succeededtests += checkColS(x1 - 1, y1 - 1);
+				succeededtests += checkColS(x1 + 1, y1 - 1);
+				if (succeededtests >= 3) {
+					for (int i = 0; i < 4; i++) {
+						int y2 = curTet.blocks[i].offsetY + curTet.y;
+						int x2 = curTet.blocks[i].offsetX + curTet.x;
+						if (y1 + 1 == y2 && x2 == x1) {
+							tspin = true;
+						}
+					}
+					if (!tspin) {
+						tspinmini = true;
+					}
+				}
+				tS = tspin;
+				tSM = tspinmini;
+				colCount = succeededtests;
+			}
 		}
 		resetGhost();
 	}
 	void rightHeld() {
-		if (!checkRightCol())
+		if (!checkRightCol()) {
 			curTet.x++;
+			if (timerFrame != 0) {
+				timerFrame = 0;
+				timerResets++;
+				visible = true;
+			}
+		}
 		resetGhost();
 	}
 	void hardDropPressed() {
@@ -355,6 +440,24 @@ public:
 					if (x2 == x1 && y2 == y1 && !(tet.blocks[a].inActive)) {
 						res = true;
 					}
+				}
+			}
+		}
+		return res;
+	}
+	bool checkColS(int x1, int y1){
+		bool res = false;
+		//GRRLIB_CB(x1, y1, w, h, RGBA(255, 255, 0, 255), RGBA(0, 0, 0, 0));
+		for (int i = 0; i < statueTets.size(); i++) {
+			Tetronimo::Tetronimo tet = statueTets[i];
+			for (int z = 0; z < 4; z++) {
+				int x2 = tet.x + tet.blocks[z].offsetX;
+				int y2 = tet.y + tet.blocks[z].offsetY;
+				if (x2 == x1 && y2 == y1) {
+					res = true;
+				}
+				if (x1 - (x / w) > 9 || x1 - (x / w) < 0 || y1 - (y / h) > 19){
+					res = true;
 				}
 			}
 		}
@@ -595,17 +698,14 @@ public:
 	}
 	void render() {
 		resetGhost();
-		if (timerFrame == 30) {
-			curTet.isStatue = true;
-			statueTets.push_back(curTet);
-			newTet();
-		}
 		curTet.w = w;
 		curTet.h = h;
 		ghost.w = w;
 		ghost.h = h;
-		GRRLIB_PrintfTTF(x - (w * 3) - (w / 2) + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, arcade, "Hold", h / 2, RGBA(255, 255, 255, 255));
-		GRRLIB_PrintfTTF(x + w * 10 + w + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, arcade, "Next", h / 2, RGBA(255, 255, 255, 255));
+		GRRLIB_Printf(x - (w * 3) - (w / 2) + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, unispace, RGBA(255, 255, 255, 255), 0.5f * (w / 16.f), "Hold");
+		GRRLIB_Printf(x + w * 10 + w + ((w * 2 + (w / 2) - (w * 4)) / 2) + w, y, unispace, RGBA(255, 255, 255, 255), 0.5f * (w / 16.f), "Next");
+		GRRLIB_Printf(x - (w * 3.f) - (w / 2.f) - ((20.f * (w / 8.f)) / w), y + h * 10, unispace, RGBA(255, 255, 255, 255), 0.5f * (w / 16.f), "Score");
+		GRRLIB_Printf(x - (w * 3.f) - (w / 2.f) - ((20.f * (w / 8.f)) / w), y + h * 12, unispace, RGBA(255, 255, 255, 255), 0.5f * (w / 16.f), "Level");
 		for (int i = 0; i < 5; i++) {
 			drawNextFrame(i, 1.5f);
 		}
@@ -632,40 +732,71 @@ public:
 				}
 			}
 		}
-		std::vector<int> coords;
-		for (int y1 = y / 16; y1 < y / 16 + 20; y1++) {
-			int amount = 0;
-			for (int i = 0; i < statueTets.size(); i++) {
-				for (int z = 0; z < 4; z++) {
-					if (statueTets[i].blocks[z].offsetY + statueTets[i].y == y1 && !(statueTets[i].blocks[z].inActive)) {
-						amount++;
-					}
-				}
-			}
-			if (amount == 10) {
-				coords.push_back(y1);
+		if (timerFrame == 30) {
+			curTet.isStatue = true;
+			statueTets.push_back(curTet);
+			newTet();
+			std::vector<int> coords;
+			for (int y1 = y / h; y1 < y / h + 20; y1++) {
+				int amount = 0;
 				for (int i = 0; i < statueTets.size(); i++) {
 					for (int z = 0; z < 4; z++) {
-						if (statueTets[i].blocks[z].offsetY + statueTets[i].y == y1){// + h / 16) {
-							statueTets[i].blocks[z].inActive = true;
-							//statueTets[i].blocks[z].offsetX = -1928102980218094;
+						if (statueTets[i].blocks[z].offsetY + statueTets[i].y == y1 && !(statueTets[i].blocks[z].inActive)) {
+							amount++;
+						}
+					}
+				}
+				if (amount == 10) {
+					coords.push_back(y1);
+					for (int i = 0; i < statueTets.size(); i++) {
+						for (int z = 0; z < 4; z++) {
+							if (statueTets[i].blocks[z].offsetY + statueTets[i].y == y1) {// + h / 16) {
+								statueTets[i].blocks[z].inActive = true;
+								//statueTets[i].blocks[z].offsetX = -1928102980218094;
+							}
 						}
 					}
 				}
 			}
-		}
-		for (int i = 0; i < coords.size(); i++) {
-			for (int z = 0; z < statueTets.size(); z++) {
-				for (int b = 0; b < 4; b++) {
-					int y1 = statueTets[z].blocks[b].offsetY + statueTets[z].y;
-					if (y1 <= 15) {
-						debugval = std::to_string(y1) + ", " + std::to_string(coords[i]);
-					}
-					if (y1 < coords[i]){// + h / 16) {
-						statueTets[z].blocks[b].offsetY = statueTets[z].blocks[b].offsetY + 1;
-						//debugval++;
+			for (int i = 0; i < coords.size(); i++) {
+				for (int z = 0; z < statueTets.size(); z++) {
+					for (int b = 0; b < 4; b++) {
+						int y1 = statueTets[z].blocks[b].offsetY + statueTets[z].y;
+						if (y1 < coords[i]) {// + h / 16) {
+							statueTets[z].blocks[b].offsetY = statueTets[z].blocks[b].offsetY + 1;
+							//debugval++;
+						}
 					}
 				}
+			}
+			std::string text = "";
+			if (tS) {
+				text = "T-Spin ";
+				tS = false;
+			}
+			if (tSM) {
+				text = "Mini T-Spin ";
+				tSM = false;
+			}
+			debugval = std::to_string(coords.size());
+			if (coords.size() == 1) {
+				text = text + "Single";
+			}
+			if (coords.size() == 2) {
+				text = text + "Double";
+			}
+			if (coords.size() == 3) {
+				text = text + "Triple";
+			}
+			if (coords.size() == 4) {
+				text = text + "Tetris";
+			}
+			if (text[text.size() - 1] == ' ') {
+				text.pop_back();
+			}
+			if (text != "") {
+				animFrame = 0;
+				animText = text;
 			}
 		}
 		for (int i = 0; i < statueTets.size(); i++) {
@@ -683,7 +814,7 @@ public:
 		if (timerActive) {
 			if (checkLowCol()) {
 				timerFrame++;
-				if (timerResets == 15) {
+				if (timerResets >= 15) {
 					timerFrame == 30;
 				}
 				if (timerFrame % 5 == 0 && timerFrame % 10 != 0) {
@@ -695,11 +826,6 @@ public:
 				if (visible) {
 					curTet.draw();
 				}
-			}
-			else {
-				curTet.draw();
-				timerFrame = 0;
-				timerResets++;
 			}
 		}
 		else {
@@ -765,18 +891,26 @@ public:
 			curFrame = 0;
 		}
 		GRRLIB_Rectangle(x, y, 10 * w, 20 * h, RGBA(255, 255, 255, 255), false); // decided not to waste a bunch of time making this cross platform
+		if (animFrame < 60) {
+			int x1 = x;
+			int w1 = w * 10;
+			float zoom = 0.5f * (w / 16.f);
+			int offset = (w1 / 2) - ((animText.size() / 2.f) * (w / 2.f));
+			int yOffset = ((h * 20.f - (16.f * (32.f * zoom))) / 2.f) + h * 10.f - (h * (animFrame / 20.f));
+			GRRLIB_Printf(x1 + offset, y + yOffset, unispace, RGBA(255, 255, 255, 255 - (animFrame * (255.f / 60.f))), zoom, animText.c_str());
+			animFrame++;
+		}
+    }
+	void start() {
+		newInstance();
+		newTet();
 	}
 	TetEngine(int w1, int h1) {
 		//holdTet.isHoldPiece = true;
 		w = w1;
 		h = h1;
-		newInstance();
-		newTet();
 	}
 	TetEngine() {
-		//holdTet.isHoldPiece = true;
-		newInstance();
-		newTet();
 	}
 private:
 };

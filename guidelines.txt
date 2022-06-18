@@ -1,8 +1,6 @@
 important things:
 Rewarding of Back to Back chains. (Tetris / T-spin)Recognition method depends on the game.
-Mini T-spin is when one of the minoes next to pointing side is empty, or holes were made without using the triple kick.
 Recognition and rewarding of T-spin moves. Conditions vary between guideline versions.
-2005 / 2009: 3-corner T
 
 The player tops out when a piece is spawned overlapping at least one block (block out), or a piece locks completely above the visible portion of the playfield (lock out).
 

@@ -1,5 +1,10 @@
-// this was originally meant to be easy to port but mid-way i decided "fuck it, it's easier to just make it go wii all the way"
+// this was originally meant to be easy to port but mid-way i decided "it's easier to just make it go wii all the way"
 // also, this is intended to be played with a sideways remote
+/*	
+	looking at this now, as of 6/18/22 (this thing was last updated in april), I realize I could have made things simpler
+	by just making an array of 1's and 0's representing cells taken on the screen, and then having an array of 4 integers
+	representing the positions in the array of each cell corresponding to the current tetrinimo
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <gccore.h>
@@ -21,6 +26,9 @@ int main(int argc, char **argv) {
 	//LWP_MutexInit(&engmut, false);
 	TetEngine_Init();
 	TetEngine eng;
+	eng.w = 16;
+	eng.h = 16;
+	eng.start();
 	PlayOgg(tetris_ogg, tetris_ogg_size, 0, OGG_INFINITE_TIME);
 	while(1) {
 		WPAD_ScanPads();
@@ -72,7 +80,8 @@ int main(int argc, char **argv) {
 		else {
 			rHeldFrame = 0;
 		}
-		GRRLIB_PrintfTTF(0, 0, arcade, debugval.c_str(), 11, RGBA(255, 255, 255, 255));
+		//GRRLIB_PrintfTTF(0, 0, arcade, std::to_string(eng.statueTets.size()).c_str(), 11, RGBA(255, 255, 255, 255));
+		//GRRLIB_Printf(0, 0, unispace, RGBA(255, 255, 255, 128), 1, std::to_string(eng.statueTets.size()).c_str()); // prints out the amount of tetriminos on screen
 		eng.render();
 		GRRLIB_Render();
 	}

@@ -9,9 +9,42 @@ std::vector<std::pair<int, int>> t23 = { {0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2}
 std::vector<std::pair<int, int>> t22 = { {0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2} };
 std::vector<std::pair<int, int>> t20 = { {0, 0}, {-1, 0}, {-1, 1}, {0, -2}, {-1, -2} };
 std::vector<std::pair<int, int>> z23 = { {0, 0}, {1, 0}, {1, -1}, {0, 2}, {1, 2} };
+
+std::vector<std::pair<int, int>> z2ol = { {0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {1, -2} };
+std::vector<std::pair<int, int>> o2zl = { {0, 0}, {2, 0}, {-1, 0}, {2, -1}, {-1, 2} };
+std::vector<std::pair<int, int>> o2tl = { {0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1} };
+std::vector<std::pair<int, int>> t2ol = { {0, 0}, {1,0}, {-2, 0}, {1, 2}, {-2, -1} };
+std::vector<std::pair<int, int>> t23l = { {0, 0}, {2, 0}, {-1, 0}, {2, -1}, {1, 2} };
+std::vector<std::pair<int, int>> t22l = { {0, 0}, {-2, 0}, {1, 0}, {-2, 1}, {-1, -2} };
+std::vector<std::pair<int, int>> t20l = { {0, 0}, {1, 0}, {-2, 0}, {1, 2}, {-2, -1} };
+std::vector<std::pair<int, int>> z23l = { {0, 0}, {-1, 0}, {2, 0}, {-1, -2}, {2, 1} };
+
 std::vector<std::pair<int, int>> getOffsets(Tetronimos type, int from, int to) {
 	if (type == Tetronimos::ITet) {
-		return { {0,0} }; // temporary, don't wanna deal with the bs of making a whole entire new set of kick tables JUST FOR A SINGLE FUCKING PIECE
+		if (from == 0 && to == 1) {
+			return z2ol;
+		}
+		if (from == 1 && to == 0) {
+			return o2zl;
+		}
+		if (from == 1 && to == 2) {
+			return o2tl;
+		}
+		if (from == 2 && to == 1) {
+			return t2ol;
+		}
+		if (from == 2 && to == 3) {
+			return t23l;
+		}
+		if (from == 3 && to == 2) {
+			return t22l;
+		}
+		if (from == 3 && to == 0) {
+			return t20l;
+		}
+		if (from == 0 && to == 3) {
+			return z23l;
+		}
 	}
 	else {
 		if (from == 0 && to == 1) {

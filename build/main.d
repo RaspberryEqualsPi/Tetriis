@@ -76,7 +76,8 @@ main.o: C:/Users/gyegh/Documents/Tetriis/source/main.cpp \
  C:/Users/gyegh/Documents/Tetriis/source/Tetronimo.h \
  C:/Users/gyegh/Documents/Tetriis/source/arcadettf.h \
  C:/Users/gyegh/Documents/Tetriis/source/tetris.h \
- C:/Users/gyegh/Documents/Tetriis/source/kicks.h
+ C:/Users/gyegh/Documents/Tetriis/source/kicks.h \
+ C:/Users/gyegh/Documents/Tetriis/source/unispace.h
 C:/devkitPro/libogc/include/gccore.h:
 C:/devkitPro/libogc/include/ogc/dsp.h:
 C:/devkitPro/libogc/include/gctypes.h:
@@ -155,3 +156,4 @@ C:/Users/gyegh/Documents/Tetriis/source/Tetronimo.h:
 C:/Users/gyegh/Documents/Tetriis/source/arcadettf.h:
 C:/Users/gyegh/Documents/Tetriis/source/tetris.h:
 C:/Users/gyegh/Documents/Tetriis/source/kicks.h:
+C:/Users/gyegh/Documents/Tetriis/source/unispace.h:

@@ -251,6 +251,8 @@ namespace Tetronimo {
 		int rot = 0;
 		bool isStatue = false;
 		bool isHoldPiece = false;
+		bool tSpin = false;
+		bool tSpinMini = false;
 		Tetronimos type = Tetronimos::STet;
 		uint32_t col1 = RGBA(255, 0, 0, 255);
 		uint32_t col2 = RGBA(255, 255, 255, 255);
