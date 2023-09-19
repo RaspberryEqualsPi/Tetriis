@@ -1,4 +1,4 @@
-#pragma once // I AM TIRED OF TETRIS'S DUMBASS ROTATION SYSTEM, WHY DO THEY HAVE TO MAKE IT SO COMPLICATED FOR A GODDAMN GAME ABOUT DROPPING BLOCKS
+#pragma once // this implementation is 100% perfect
 #include <vector>
 #include "Tetronimo.h"
 std::vector<std::pair<int, int>> z2o = { {0, 0}, {-1, 0}, {-1, -1}, {0, 2}, {-1, 2} };
